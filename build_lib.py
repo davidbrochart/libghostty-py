@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"Build libghostty-vt from a ghostty checkout and bundle the shared lib into pyghostty/_lib."
+"Build libghostty-vt from a ghostty checkout and bundle the shared lib into ghostty/_lib."
 import importlib.metadata,os,shutil,subprocess,sys,sysconfig,tempfile,tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).parent
 
 def build_config():
-    with open(ROOT/'pyproject.toml', 'rb') as f: return tomllib.load(f)['tool']['pyghostty']
+    with open(ROOT/'pyproject.toml', 'rb') as f: return tomllib.load(f)['tool']['libghostty']
 
 def ghostty_src():
-    "The ghostty checkout to build from: $GHOSTTY_SRC, defaulting to a sibling clone."
-    src = Path(os.environ.get('GHOSTTY_SRC', '../ghostty')).expanduser().resolve()
+    "The ghostty checkout to build from: $GHOSTTY_SRC, defaulting to ghostty-src inside this project."
+    src = Path(os.environ.get('GHOSTTY_SRC', ROOT/'ghostty-src')).expanduser().resolve()
     if not (src/'build.zig').exists(): sys.exit(f"No ghostty checkout at {src}; set GHOSTTY_SRC")
     res = subprocess.run(['git', '-C', str(src), 'rev-parse', 'HEAD'], capture_output=True, text=True)
     if res.returncode: sys.exit(res.stderr.strip())
@@ -43,7 +43,7 @@ def main():
         # Ghostty also builds static/xcframework outputs which may fail; this package only needs the shared artifact.
         res = _zig_build(src, prefix)
         lib,name = _built_lib(prefix, res.returncode)
-        dest = ROOT/'pyghostty'/'_lib'
+        dest = ROOT/'ghostty'/'_lib'
         dest.mkdir(exist_ok=True)
         for old in dest.glob('libghostty-vt*'): old.unlink()
         shutil.copy2(lib, dest/name)

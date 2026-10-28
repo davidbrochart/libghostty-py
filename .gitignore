@@ -13,6 +13,8 @@ venv/
 .env
 .DS_Store
 .ipynb_checkpoints/
-pyghostty/_lib/*
-!pyghostty/_lib/.gitkeep
+ghostty/_lib/*
+!ghostty/_lib/.gitkeep
 meta/
+
+/ghostty-src/

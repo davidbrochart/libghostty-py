@@ -3,14 +3,14 @@ requires = ["setuptools>=77", "ziglang==0.16.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyghostty"
+name = "libghostty-py"
 dynamic = ["version"]
 description = "Python bindings for libghostty"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE", "LICENSE.ghostty"]
-authors = [{ name = "pyghostty contributors" }]
+authors = [{ name = "pyghostty contributors" }, { name = "libghostty-py contributors" }]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
@@ -28,18 +28,18 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/AnswerDotAI/pyghostty"
+Upstream = "https://github.com/AnswerDotAI/pyghostty"
 
 [tool.setuptools.dynamic]
-version = { attr = "pyghostty.__version__" }
+version = { attr = "ghostty.__version__" }
 
 [tool.setuptools.packages.find]
-include = ["pyghostty"]
+include = ["ghostty"]
 
 [tool.setuptools.package-data]
-pyghostty = ["_lib/*"]
+ghostty = ["_lib/*"]
 
-[tool.pyghostty]
+[tool.libghostty]
 ghostty-rev = "6467b1dab0be087fa8f0a7ccc7b3c5b88b9be7a5"
 zig-version = "0.16.0"
 

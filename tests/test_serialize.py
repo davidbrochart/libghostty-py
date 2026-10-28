@@ -1,6 +1,6 @@
 import pytest
-from pyghostty import Terminal, GhosttyError, UnknownSequence
-from pyghostty._ffi import ffi, lib, check
+from ghostty import Terminal, GhosttyError, UnknownSequence
+from ghostty._ffi import ffi, lib, check
 
 
 def visual_style(t, x, y):
@@ -143,8 +143,8 @@ def test_xterm_roundtrip():
     from pathlib import Path
     import subprocess
 
-    if not os.environ.get('PYGHOSTTY_XTERM_MODULE'):
-        pytest.skip('set PYGHOSTTY_XTERM_MODULE to the installed @xterm/headless path')
+    if not os.environ.get('LIBGHOSTTY_XTERM_MODULE'):
+        pytest.skip('set LIBGHOSTTY_XTERM_MODULE to the installed @xterm/headless path')
     cases = []
     for label, data, suffix in [
         ('prompt', b'\x1b[31mhello\x1b[0m\r\nprompt> ', b'text'),

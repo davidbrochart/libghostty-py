@@ -1,4 +1,4 @@
-const {Terminal} = require(process.env.PYGHOSTTY_XTERM_MODULE);
+const {Terminal} = require(process.env.LIBGHOSTTY_XTERM_MODULE);
 const assert = require('node:assert/strict');
 const cases = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
 const write = (t,b) => new Promise(resolve=>t.write(Buffer.from(b,'base64'),resolve));

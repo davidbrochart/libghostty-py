@@ -1,5 +1,12 @@
 <!-- do not remove -->
 
+## Unreleased — libghostty-py
+
+- Fork pyghostty as the `libghostty-py` package, preserving its history and licenses.
+- Include terminal-state serialization and Windows x64 wheel builds.
+
+The entries below describe the original pyghostty releases.
+
 ## 0.1.0
 
 ### New Features

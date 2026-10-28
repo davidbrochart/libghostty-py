@@ -1,12 +1,12 @@
 import pytest
-from pyghostty import Terminal, UnknownSequence
+from ghostty import Terminal, UnknownSequence
 
 def test_feed_cursor_text():
     with Terminal(40, 10) as t:
         assert t.size == (40, 10)
-        t.feed('Hello from \x1b[1;35mpyghostty\x1b[0m!\r\nsecond line')
+        t.feed('Hello from \x1b[1;35mlibghostty\x1b[0m!\r\nsecond line')
         assert t.cursor == (11, 1)
-        assert t.text() == 'Hello from pyghostty!\nsecond line'
+        assert t.text() == 'Hello from libghostty!\nsecond line'
 
 def test_wrap():
     with Terminal(10, 4) as t:

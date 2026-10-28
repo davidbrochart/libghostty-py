@@ -8,13 +8,13 @@ ffi = FFI()
 ffi.cdef(CDEF)
 
 def _libpath():
-    p = os.environ.get('PYGHOSTTY_LIB')
+    p = os.environ.get('LIBGHOSTTY_LIB')
     if p: return p
     d = Path(__file__).parent/'_lib'
     for ext in ('.dylib','.so','.dll'):
         c = d/f'libghostty-vt{ext}'
         if c.exists(): return str(c)
-    raise OSError(f"libghostty-vt not found in {d}; run build_lib.py or set PYGHOSTTY_LIB")
+    raise OSError(f"libghostty-vt not found in {d}; run build_lib.py or set LIBGHOSTTY_LIB")
 
 lib = ffi.dlopen(_libpath())
 

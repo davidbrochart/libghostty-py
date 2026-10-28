@@ -1,13 +1,15 @@
-# pyghostty
+# libghostty-py
 
-Unofficial (but complete) python bindings for [libghostty-vt](https://mitchellh.com/writing/libghostty-is-coming). `libghostty` is Ghostty's embeddable terminal emulation core, a headless, high-fidelity VT emulator. These bindings cover terminal state, screen and scrollback snapshots, kitty graphics, and everything else Ghostty's production terminal core handles.
+This is a fork of [pyghostty](https://github.com/AnswerDotAI/pyghostty) (from [this commit](https://github.com/AnswerDotAI/pyghostty/commit/5abf31813fb3707fcded75d9521b03e3bdbdfee8)).
+
+Python bindings for [libghostty-vt](https://mitchellh.com/writing/libghostty-is-coming). `libghostty` is Ghostty's embeddable terminal emulation core, a headless, high-fidelity VT emulator. These bindings cover terminal state, screen and scrollback snapshots, kitty graphics, and everything else Ghostty's production terminal core handles.
 
 The binding is Python-ABI-independent: pure Python (cffi ABI mode) over a bundled `libghostty-vt` shared library, so one wheel per platform covers every Python version. No compiler is needed at install time. Wheel builds cover Linux and macOS (x86-64 and ARM64) and Windows (x86-64).
 
 ## Usage
 
 ```python
-from pyghostty import Terminal
+from ghostty import Terminal
 
 with Terminal(cols=80, rows=24) as t:
     t.feed('hello\r\nworld')
@@ -17,9 +19,9 @@ with Terminal(cols=80, rows=24) as t:
     t.resize(120, 24)  # reflows the primary screen
 ```
 
-The base layer, `pyghostty._cdef`/`_ffi`, exposes the complete generated C API as raw `ffi`/`lib` (regenerate with `gen_cdef.py` after moving the pinned ghostty rev).
+The base layer, `ghostty._cdef`/`_ffi`, exposes the complete generated C API as raw `ffi`/`lib` (regenerate with `gen_cdef.py` after moving the pinned ghostty rev).
 
-`pyghostty.core.Terminal` provides an ergonomic wrapper for commonly used parts.
+`ghostty.core.Terminal` provides an ergonomic wrapper for commonly used parts.
 
 ### Restoring a terminal on reconnect
 
@@ -55,7 +57,9 @@ The shared library is built from a ghostty checkout with the Zig toolchain (inst
 GHOSTTY_SRC=/path/to/ghostty python build_lib.py
 ```
 
-The checkout must be at the revision pinned in `pyproject.toml`. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `pyghostty/_lib/`, where the package loader and wheel builds pick it up.
+Without `GHOSTTY_SRC`, the build looks for a checkout in `ghostty-src/` inside this project.
+
+The checkout must be at the revision pinned in `pyproject.toml`. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
 
 ## Development
 
@@ -68,13 +72,13 @@ pytest -q
 To test against headless xterm.js:
 
 ```bash
-npm install --prefix /tmp/pyghostty-xterm @xterm/headless@6.0.0
-PYGHOSTTY_XTERM_MODULE=/tmp/pyghostty-xterm/node_modules/@xterm/headless pytest -q
+npm install --prefix /tmp/libghostty-xterm @xterm/headless@6.0.0
+LIBGHOSTTY_XTERM_MODULE=/tmp/libghostty-xterm/node_modules/@xterm/headless pytest -q
 ```
 
 ### Versioning
 
-Version lives in `pyghostty/__init__.py` as `__version__`.
+Version lives in `ghostty/__init__.py` as `__version__`.
 
 ### Releases
 
