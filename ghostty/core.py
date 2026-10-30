@@ -92,12 +92,13 @@ class Terminal:
         """Feed only the shortest prefix of `data` that finishes the sequence in progress, returning how many bytes it consumed.
         Returns 0 when the parser is already outside any sequence, and None when all of `data` was consumed without finishing it."""
         if isinstance(data, str): data = data.encode()
-        n = ffi.new('size_t*')
-        res = lib.ghostty_terminal_vt_write_until_ground(self._t[0], data, len(data), n)
+        stop = init_sized('GhosttyTerminalWriteStop')
+        res = lib.ghostty_terminal_vt_write_until(
+            self._t[0], data, len(data), lib.GHOSTTY_TERMINAL_BOUNDARY_GROUND, stop)
         self._raise_cb_err()
         if res == lib.GHOSTTY_NO_VALUE: return None
-        check(res, 'vt_write_until_ground')
-        return n[0]
+        check(res, 'vt_write_until')
+        return stop.consumed
 
     def on_unknown_sequence(self, fn, max_bytes=4096):
         """Call `fn(UnknownSequence)` for each complete APC or OSC sequence libghostty-vt does not implement. Keep at most

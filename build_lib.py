@@ -14,8 +14,16 @@ def ghostty_src():
     if not (src/'build.zig').exists(): sys.exit(f"No ghostty checkout at {src}; set GHOSTTY_SRC")
     res = subprocess.run(['git', '-C', str(src), 'rev-parse', 'HEAD'], capture_output=True, text=True)
     if res.returncode: sys.exit(res.stderr.strip())
-    expected = build_config()['ghostty-rev']
-    if (rev := res.stdout.strip()) != expected: sys.exit(f"Ghostty checkout is {rev}; expected {expected}")
+    version = build_config()['ghostty-version']
+    tag = f'v{version}'
+    expected = subprocess.run(
+        ['git', '-C', str(src), 'rev-parse', '--verify', f'refs/tags/{tag}^{{commit}}'],
+        capture_output=True, text=True,
+    )
+    if expected.returncode:
+        sys.exit(f"Ghostty release tag {tag} is missing; fetch it in {src}")
+    if (rev := res.stdout.strip()) != expected.stdout.strip():
+        sys.exit(f"Ghostty checkout is {rev}; expected release {tag} ({expected.stdout.strip()})")
     return src
 
 def _built_lib(prefix, returncode):

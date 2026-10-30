@@ -1,5 +1,5 @@
 "Layer 0: the complete libghostty-vt ABI -- generated declarations, loaded library, raw `ffi`/`lib`."
-import os
+import sys
 from pathlib import Path
 from cffi import FFI
 from ._cdef import CDEF
@@ -8,13 +8,22 @@ ffi = FFI()
 ffi.cdef(CDEF)
 
 def _libpath():
-    p = os.environ.get('LIBGHOSTTY_LIB')
-    if p: return p
     d = Path(__file__).parent/'_lib'
     for ext in ('.dylib','.so','.dll'):
         c = d/f'libghostty-vt{ext}'
         if c.exists(): return str(c)
-    raise OSError(f"libghostty-vt not found in {d}; run build_lib.py or set LIBGHOSTTY_LIB")
+    prefix = Path(sys.prefix)
+    if sys.platform == 'win32':
+        c = prefix/'Library'/'bin'/'ghostty-vt.dll'
+    elif sys.platform == 'darwin':
+        c = prefix/'lib'/'libghostty-vt.dylib'
+    else:
+        c = prefix/'lib'/'libghostty-vt.so'
+    if c.is_file(): return str(c)
+    raise OSError(
+        f"libghostty-vt not found in {d} or at {c}; "
+        "install a compatible shared library in the Python environment or run build_lib.py"
+    )
 
 lib = ffi.dlopen(_libpath())
 

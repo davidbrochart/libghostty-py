@@ -1,6 +1,15 @@
 <!-- do not remove -->
 
-## Unreleased — libghostty-py
+## 0.2.0 — libghostty-py
+
+- Update the bindings and bundled library to Ghostty 1.4.0 (Zig 0.17.0),
+  matching conda-forge libghostty-vt. Adapt ground-boundary writes and VT
+  serialization to the updated API and formatter behavior.
+- Support Python-only wheels with `--config-settings=bundle=false` and find
+  separately installed shared libraries in the active Python environment.
+- Pin bundled Ghostty builds to a release version and validate its Git tag.
+
+## 0.1.0 — libghostty-py
 
 - Fork pyghostty as the `libghostty-py` package, preserving its history and licenses.
 - Include terminal-state serialization and Windows x64 wheel builds.

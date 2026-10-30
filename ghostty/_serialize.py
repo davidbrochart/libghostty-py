@@ -1,6 +1,5 @@
 "VT serialization helpers. The source terminal is never mutated."
 import re
-from itertools import groupby
 
 from ._ffi import ffi, lib, check, GhosttyError
 from .core import Terminal, init_sized, read_bytes
@@ -33,45 +32,8 @@ def _extras(t, content, *, before=False, **extras):
     return data[len(content):]
 
 
-def _blank_row(t, y):
-    "Render background-only cells that Ghostty's text formatter omits."
-    colors = []
-    for x in range(t.size[0]):
-        cell, tag = ffi.new('GhosttyCell*'), ffi.new('GhosttyCellContentTag*')
-        ref = t.ref(x, y, 'screen')
-        check(lib.ghostty_grid_ref_cell(ref, cell), 'cell')
-        check(lib.ghostty_cell_get(cell[0], lib.GHOSTTY_CELL_DATA_CONTENT_TAG, tag), 'cell tag')
-        color = None
-        if tag[0] == lib.GHOSTTY_CELL_CONTENT_BG_COLOR_PALETTE:
-            value = ffi.new('uint8_t*')
-            check(lib.ghostty_cell_get(cell[0], lib.GHOSTTY_CELL_DATA_COLOR_PALETTE, value), 'cell palette')
-            color = f'48;5;{value[0]}'
-        elif tag[0] == lib.GHOSTTY_CELL_CONTENT_BG_COLOR_RGB:
-            value = ffi.new('GhosttyColorRgb*')
-            check(lib.ghostty_cell_get(cell[0], lib.GHOSTTY_CELL_DATA_COLOR_RGB, value), 'cell RGB')
-            color = f'48;2;{value.r};{value.g};{value.b}'
-        colors.append(color)
-    if not any(colors): return b''
-    data = bytearray()
-    for color, run in groupby(colors):
-        count = sum(1 for _ in run)
-        data.extend(('\x1b[0' + (';' + color if color else '') + 'm').encode())
-        # ECH preserves blank cells as blanks, rather than literal spaces.
-        data.extend(f'\x1b[{count}X\x1b[{count}C'.encode())
-    return bytes(data)
-
-
 def _screen(t, palette):
     content = _format(t)
-    plain = _format(t, emit=lib.GHOSTTY_FORMATTER_FORMAT_PLAIN, unwrap=False)
-    total = t.get('total_rows', 'size_t')
-    # Ghostty trims trailing blank rows even with trim=False. CUP alone cannot
-    # recreate the scrollback/screen boundary: emit their missing line feeds.
-    emitted = plain.count(b'\n') + 1 if content else 0
-    padding = bytearray()
-    for row in range(emitted, total):
-        if row: padding.extend(b'\r\n')
-        padding.extend(b'\x1b[0m' + _blank_row(t, row))
     prefix = _extras(t, content, before=True, palette=palette, tabstops=True)
     modes = _extras(t, content, before=True, modes=True)
     # Screen selection is handled explicitly after restoring the primary.
@@ -87,7 +49,7 @@ def _screen(t, palette):
         left = int(horizontal[1]) - 1 if horizontal else 0
         cursor = re.sub(rb'\x1b\[(\d+);(\d+)H',
                         lambda m: f'\x1b[{int(m[1])-top};{int(m[2])-left}H'.encode(), cursor, count=1)
-    return prefix + content + padding + state + modes + cursor
+    return prefix + content + state + modes + cursor
 
 
 def _primary_clone(t):

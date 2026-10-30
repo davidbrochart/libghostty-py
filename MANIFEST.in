@@ -3,3 +3,5 @@ include LICENSE
 include LICENSE.ghostty
 include CHANGELOG.md
 recursive-exclude ghostty/_lib *
+include _build_backend.py
+include build_lib.py

@@ -19,7 +19,7 @@ with Terminal(cols=80, rows=24) as t:
     t.resize(120, 24)  # reflows the primary screen
 ```
 
-The base layer, `ghostty._cdef`/`_ffi`, exposes the complete generated C API as raw `ffi`/`lib` (regenerate with `gen_cdef.py` after moving the pinned ghostty rev).
+The base layer, `ghostty._cdef`/`_ffi`, exposes the complete generated C API as raw `ffi`/`lib` (regenerate with `gen_cdef.py` after updating the pinned Ghostty release).
 
 `ghostty.core.Terminal` provides an ergonomic wrapper for commonly used parts.
 
@@ -59,7 +59,33 @@ GHOSTTY_SRC=/path/to/ghostty python build_lib.py
 
 Without `GHOSTTY_SRC`, the build looks for a checkout in `ghostty-src/` inside this project.
 
-The checkout must be at the revision pinned in `pyproject.toml`. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
+The checkout must be at the release tag for `ghostty-version` in `pyproject.toml`
+(currently `v1.4.0`), with that tag available locally. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
+
+### Using an external shared library
+
+Wheel builds bundle libghostty-vt by default. To build a Python-only wheel
+without compiling or bundling Ghostty, pass `--config-settings=bundle=false`:
+
+```bash
+python -m pip install . --config-settings=bundle=false
+```
+
+The resulting wheel is platform-independent and does not need Zig to build.
+This also excludes any library left by an earlier bundled build.
+The loader checks the bundled library, then the active Python environment
+(`sys.prefix`):
+
+- Linux: `lib/libghostty-vt.so`
+- macOS: `lib/libghostty-vt.dylib`
+- Windows: `Library/bin/ghostty-vt.dll`
+
+Libraries installed in these locations are found automatically. The external
+library must provide the ABI of Ghostty 1.4.0, pinned in `pyproject.toml`.
+
+Bundled builds install the pinned Zig toolchain automatically when using build
+isolation. With `--no-build-isolation`, install `ziglang==0.17.0` yourself.
+The `bundle` setting accepts `true` or `false` and defaults to `true`.
 
 ## Development
 

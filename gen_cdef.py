@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"Generate ghostty/_cdef.py from ghostty's libghostty-vt headers. Re-run on each ghostty rev bump and review the diff."
+"Generate ghostty/_cdef.py from ghostty's libghostty-vt headers. Re-run on each Ghostty release bump and review the diff."
 import re,subprocess
 from pathlib import Path
 from build_lib import ghostty_src
@@ -29,7 +29,8 @@ def clean(src):
     src = re.sub(r'static inline [^{]*\{[^}]*\}', '', src, flags=re.S)  # header-only helpers: no symbol in the lib
     for macro,repl in [('GHOSTTY_API ',''), ('GHOSTTY_ENUM_TYPED ',''), ('GHOSTTY_ENUM_MAX_VALUE','0x7FFFFFFF')]:
         src = src.replace(macro, repl)
-    return re.sub(r'\n{3,}', '\n\n', src).strip()
+    src = re.sub(r'\n{3,}', '\n\n', src).strip()
+    return '\n'.join(line.rstrip() for line in src.splitlines())
 
 def gen():
     src = ghostty_src()
