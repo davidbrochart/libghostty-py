@@ -24,7 +24,6 @@ dev = [
   "fastship",
   "build",
   "cibuildwheel~=3.4",
-  "ziglang==0.17.0",
   "pytest",
 ]
 
@@ -45,6 +44,7 @@ ghostty-version = "1.4.0"
 zig-version = "0.17.0"
 
 [tool.cibuildwheel]
+before-build = "python {project}/install_zig.py"
 build = "cp311-*"
 skip = "*-musllinux_* *-win32"
 test-requires = ["pytest", "setuptools>=77", "nodejs-wheel==24.19.0"]

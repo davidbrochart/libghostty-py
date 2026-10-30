@@ -33,14 +33,7 @@ def _configured(hook):
     return configured
 
 
-@_configured
-def get_requires_for_build_wheel(config_settings=None):
-    requirements = _setuptools.get_requires_for_build_wheel(config_settings)
-    if bundle_library():
-        requirements.append("ziglang==0.17.0")
-    return requirements
-
-
+get_requires_for_build_wheel = _configured(_setuptools.get_requires_for_build_wheel)
 get_requires_for_build_sdist = _configured(_setuptools.get_requires_for_build_sdist)
 get_requires_for_build_editable = _configured(_setuptools.get_requires_for_build_editable)
 prepare_metadata_for_build_wheel = _configured(_setuptools.prepare_metadata_for_build_wheel)

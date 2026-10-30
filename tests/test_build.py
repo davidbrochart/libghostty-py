@@ -57,7 +57,7 @@ def test_wheel_contents_and_requirements(project, bundle):
         "print(json.dumps(get_requires_for_build_wheel(config_settings)))", bundle)
     assert result.returncode == 0, result.stdout + result.stderr
     requirements = json.loads(result.stdout.splitlines()[-1])
-    assert ("ziglang==0.17.0" in requirements) == bundled
+    assert not any("ziglang" in requirement for requirement in requirements)
 
 
 def test_invalid_bundle_setting(project):
@@ -94,6 +94,5 @@ def test_build_setting_does_not_leak(project):
     result = run_backend(project,
         "from _build_backend import get_requires_for_build_wheel, bundle_library; "
         "get_requires_for_build_wheel(config_settings); "
-        "assert bundle_library() is True; "
-        "assert 'ziglang==0.17.0' in get_requires_for_build_wheel()", "false")
+        "assert bundle_library() is True", "false")
     assert result.returncode == 0, result.stdout + result.stderr

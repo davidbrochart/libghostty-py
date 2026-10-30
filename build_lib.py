@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 "Build libghostty-vt from a ghostty checkout and bundle the shared lib into ghostty/_lib."
-import importlib.metadata,os,shutil,subprocess,sys,sysconfig,tempfile,tomllib
+import os,shutil,subprocess,sys,sysconfig,tempfile,tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -34,17 +34,25 @@ def _built_lib(prefix, returncode):
     if len(found) != 1: sys.exit(f"Expected one shared library in {root}, found {found} (zig exit {returncode})")
     return found[0],name
 
+def zig_executable():
+    version = build_config()['zig-version']
+    local = ROOT/'.zig'/('zig.exe' if sys.platform == 'win32' else 'zig')
+    executable = str(local) if local.is_file() else shutil.which('zig')
+    if not executable:
+        sys.exit(f"Install Zig {version} on PATH or run python install_zig.py")
+    actual = subprocess.check_output([executable, 'version'], text=True).strip()
+    if actual != version:
+        sys.exit(f"Zig is {actual}; expected {version}")
+    return executable
+
+
 def _zig_build(src, prefix):
     # Zig supplies the MinGW toolchain, so Windows x64 builds need no MSVC SDK.
     target = ['-Dtarget=x86_64-windows-gnu'] if sys.platform == 'win32' and sysconfig.get_platform() == 'win-amd64' else []
-    return subprocess.run([sys.executable, '-m', 'ziglang', 'build', '-Demit-lib-vt=true', '-Doptimize=ReleaseFast', '-Dcpu=baseline', *target, '--prefix', str(prefix)],
+    return subprocess.run([zig_executable(), 'build', '-Demit-lib-vt=true', '-Doptimize=ReleaseFast', '-Dcpu=baseline', *target, '--prefix', str(prefix)],
         cwd=src)
 
 def main():
-    cfg = build_config()
-    try: zig_version = importlib.metadata.version('ziglang')
-    except importlib.metadata.PackageNotFoundError: sys.exit(f"Install ziglang=={cfg['zig-version']}")
-    if zig_version != cfg['zig-version']: sys.exit(f"ziglang is {zig_version}; expected {cfg['zig-version']}")
     src = ghostty_src()
     with tempfile.TemporaryDirectory() as tmp:
         prefix = Path(tmp)/'out'

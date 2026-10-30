@@ -51,7 +51,9 @@ cursors are not exported. Rendering can differ between terminal emulators.
 
 ## Building the library
 
-The shared library is built from a ghostty checkout with the Zig toolchain (installed via pip as `ziglang`):
+The shared library is built from a Ghostty checkout with Zig 0.17.0. Install
+that Zig version on PATH, or download the pinned official toolchain with
+`python install_zig.py` (downloads are verified against recorded SHA-256 hashes):
 
 ```bash
 GHOSTTY_SRC=/path/to/ghostty python build_lib.py
@@ -83,14 +85,15 @@ The loader checks the bundled library, then the active Python environment
 Libraries installed in these locations are found automatically. The external
 library must provide the ABI of Ghostty 1.4.0, pinned in `pyproject.toml`.
 
-Bundled builds install the pinned Zig toolchain automatically when using build
-isolation. With `--no-build-isolation`, install `ziglang==0.17.0` yourself.
+Bundled builds require Zig 0.17.0 on PATH or the local toolchain installed by
+`python install_zig.py`. Release CI installs the verified toolchain before building.
 The `bundle` setting accepts `true` or `false` and defaults to `true`.
 
 ## Development
 
 ```bash
 pip install -e .[dev]
+python install_zig.py
 GHOSTTY_SRC=/path/to/ghostty python build_lib.py
 pytest -q
 ```
