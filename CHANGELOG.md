@@ -1,6 +1,6 @@
 <!-- do not remove -->
 
-## Unreleased
+## 0.3.0 — libghostty-py
 
 - Build against the independent libghostty-vt 1.0.0 release (`vt-1.0.0`)
   and regenerate the C API declarations. Adapt formatting and packed style
