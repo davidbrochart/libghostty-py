@@ -12,7 +12,7 @@ def source(tmp_path, monkeypatch):
     spec = importlib.util.spec_from_file_location('release_build_lib', script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    monkeypatch.setattr(module, 'build_config', lambda: {'ghostty-version': '1.4.0'})
+    monkeypatch.setattr(module, 'build_config', lambda: {'vt-version': '1.0.0'})
     monkeypatch.setenv('GHOSTTY_SRC', str(tmp_path))
 
     def git(*args):
@@ -31,19 +31,19 @@ def source(tmp_path, monkeypatch):
 
 def test_annotated_release_tag(source):
     module, git, path = source
-    git('tag', '-a', 'v1.4.0', '-m', 'Release 1.4.0')
+    git('tag', '-a', 'vt-1.0.0', '-m', 'Release 1.4.0')
     assert module.ghostty_src() == path.resolve()
 
 
 def test_wrong_commit_is_rejected(source):
     module, git, _ = source
-    git('tag', 'v1.4.0')
+    git('tag', 'vt-1.0.0')
     git('commit', '--allow-empty', '-m', 'After release')
-    with pytest.raises(SystemExit, match='expected release v1.4.0'):
+    with pytest.raises(SystemExit, match='expected release vt-1.0.0'):
         module.ghostty_src()
 
 
 def test_missing_release_tag_is_actionable(source):
     module, _, _ = source
-    with pytest.raises(SystemExit, match='release tag v1.4.0 is missing; fetch it'):
+    with pytest.raises(SystemExit, match='release tag vt-1.0.0 is missing; fetch it'):
         module.ghostty_src()

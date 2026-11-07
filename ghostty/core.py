@@ -165,16 +165,21 @@ class Terminal:
             if c.tag == lib.GHOSTTY_STYLE_COLOR_PALETTE: return ('palette', c.value.palette)
             if c.tag == lib.GHOSTTY_STYLE_COLOR_RGB: return ('rgb', (c.value.rgb.r, c.value.rgb.g, c.value.rgb.b))
             return None
-        d = {a: bool(getattr(st, a)) for a in self._STYLE_ATTRS}
-        return d | dict(underline=st.underline, fg=color(st.fg_color), bg=color(st.bg_color),
+        d = {a: bool(st.flags & getattr(lib, f'GHOSTTY_STYLE_FLAG_{a.upper()}')) for a in self._STYLE_ATTRS}
+        underline = (st.flags & lib.GHOSTTY_STYLE_UNDERLINE_MASK) >> lib.GHOSTTY_STYLE_UNDERLINE_SHIFT
+        return d | dict(underline=underline, fg=color(st.fg_color), bg=color(st.bg_color),
                         underline_color=color(st.underline_color))
 
     def _format_sel(self, sel, unwrap=False):
         "Plain-text rendering of `sel`, trailing whitespace trimmed."
-        opts = init_sized('GhosttyTerminalSelectionFormatOptions')
-        opts.emit = lib.GHOSTTY_FORMATTER_FORMAT_PLAIN
-        opts.unwrap, opts.trim, opts.selection = unwrap, True, sel
-        return read_buf(lambda b,l,n: lib.ghostty_terminal_selection_format_buf(self._t[0], opts[0], b, l, n))
+        formatter = ffi.new('GhosttyFormatter*')
+        check(lib.ghostty_formatter_terminal_new(ffi.NULL, formatter, self._t[0]), 'formatter_new')
+        try:
+            check(lib.ghostty_formatter_set(formatter[0], lib.GHOSTTY_FORMATTER_OPT_SELECTION, sel), 'formatter selection')
+            check(lib.ghostty_formatter_set(formatter[0], lib.GHOSTTY_FORMATTER_OPT_UNWRAP, ffi.new('bool*', unwrap)), 'formatter unwrap')
+            return read_buf(lambda b,l,n: lib.ghostty_formatter_format_buf(formatter[0], b, l, n))
+        finally:
+            lib.ghostty_formatter_free(formatter[0])
 
     def text(self):
         "Plain-text of the visible screen (active area) only; rows as displayed, soft-wraps kept."

@@ -14,8 +14,8 @@ def ghostty_src():
     if not (src/'build.zig').exists(): sys.exit(f"No ghostty checkout at {src}; set GHOSTTY_SRC")
     res = subprocess.run(['git', '-C', str(src), 'rev-parse', 'HEAD'], capture_output=True, text=True)
     if res.returncode: sys.exit(res.stderr.strip())
-    version = build_config()['ghostty-version']
-    tag = f'v{version}'
+    version = build_config()['vt-version']
+    tag = f'vt-{version}'
     expected = subprocess.run(
         ['git', '-C', str(src), 'rev-parse', '--verify', f'refs/tags/{tag}^{{commit}}'],
         capture_output=True, text=True,

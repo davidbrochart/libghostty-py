@@ -40,7 +40,7 @@ include = ["ghostty"]
 ghostty = ["_lib/*"]
 
 [tool.libghostty]
-ghostty-version = "1.4.0"
+vt-version = "1.0.0"
 zig-version = "0.17.0"
 
 [tool.cibuildwheel]
