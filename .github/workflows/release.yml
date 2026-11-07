@@ -5,12 +5,19 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  workflow_dispatch:
+    inputs:
+      release_run_id:
+        description: Release workflow run whose existing wheels should be published
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   build:
+    if: github.event_name != 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -64,20 +71,52 @@ jobs:
           path: wheelhouse/*.whl
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      !cancelled() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (startsWith(github.ref, 'refs/tags/v') && needs.build.result == 'success'))
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
       id-token: write
     steps:
+      - name: Check the source release run
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_RUN_ID: ${{ inputs.release_run_id }}
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          import subprocess
+
+          run = json.loads(subprocess.check_output([
+              'gh', 'run', 'view', os.environ['RELEASE_RUN_ID'],
+              '--repo', os.environ['GITHUB_REPOSITORY'],
+              '--json', 'event,headBranch,jobs,workflowName',
+          ]))
+          assert run['event'] == 'push' and run['workflowName'] == 'CI', run
+          assert re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', run['headBranch']), run
+          builds = [job for job in run['jobs'] if job['name'].startswith('build (')]
+          assert len(builds) == 5 and all(job['conclusion'] == 'success' for job in builds), builds
       - uses: actions/download-artifact@v8
         with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event_name == 'workflow_dispatch' && inputs.release_run_id || github.run_id }}
           pattern: wheels-*
           path: dist
           merge-multiple: true
       - uses: softprops/action-gh-release@v3
+        if: github.event_name != 'workflow_dispatch'
         with:
           files: dist/*.whl
           generate_release_notes: true
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Manual recovery skips Sigstore; ordinary releases retain attestations.
+          attestations: ${{ github.event_name != 'workflow_dispatch' }}
+          skip-existing: ${{ github.event_name == 'workflow_dispatch' }}
