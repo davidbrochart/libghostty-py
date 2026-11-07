@@ -1,5 +1,11 @@
 <!-- do not remove -->
 
+## Unreleased
+
+- Build against the independent libghostty-vt 1.0.0 release (`vt-1.0.0`)
+  and regenerate the C API declarations. Adapt formatting and packed style
+  attributes while preserving the Python API.
+
 ## 0.2.0 — libghostty-py
 
 - Update the bindings and bundled library to Ghostty 1.4.0 (Zig 0.17.0),

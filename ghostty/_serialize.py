@@ -2,20 +2,23 @@
 import re
 
 from ._ffi import ffi, lib, check, GhosttyError
-from .core import Terminal, init_sized, read_bytes
+from .core import Terminal, read_bytes
 
 
 def _format(t, *, emit=None, unwrap=True, **extras):
-    opts = init_sized('GhosttyFormatterTerminalOptions')
-    opts.emit = lib.GHOSTTY_FORMATTER_FORMAT_VT if emit is None else emit
-    opts.unwrap = unwrap
-    for name, value in extras.items():
-        screen = ('cursor', 'style', 'hyperlink', 'protection', 'kitty_keyboard', 'charsets')
-        target = opts.extra.screen if name in screen else opts.extra
-        setattr(target, name, value)
     formatter = ffi.new('GhosttyFormatter*')
-    check(lib.ghostty_formatter_terminal_new(ffi.NULL, formatter, t._t[0], opts[0]), 'formatter_new')
+    check(lib.ghostty_formatter_terminal_new(ffi.NULL, formatter, t._t[0]), 'formatter_new')
     try:
+        flags = 0
+        for name, value in extras.items():
+            if value: flags |= getattr(lib, f'GHOSTTY_FORMATTER_EXTRA_{name.upper()}')
+        for option, ctype, value in (
+            ('EMIT', 'GhosttyFormatterFormat', lib.GHOSTTY_FORMATTER_FORMAT_VT if emit is None else emit),
+            ('UNWRAP', 'bool', unwrap), ('TRIM', 'bool', False),
+            ('EXTRAS', 'GhosttyFormatterExtras', flags),
+        ):
+            check(lib.ghostty_formatter_set(formatter[0], getattr(lib, f'GHOSTTY_FORMATTER_OPT_{option}'),
+                  ffi.new(ctype+'*', value)), f'formatter {option}')
         return read_bytes(lambda b,n,out: lib.ghostty_formatter_format_buf(formatter[0], b, n, out))
     finally:
         lib.ghostty_formatter_free(formatter[0])

@@ -43,9 +43,9 @@ jobs:
           import tomllib
 
           with open("pyproject.toml", "rb") as config:
-              version = tomllib.load(config)["tool"]["libghostty"]["ghostty-version"]
+              version = tomllib.load(config)["tool"]["libghostty"]["vt-version"]
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              print(f"tag=v{version}", file=output)
+              print(f"tag=vt-{version}", file=output)
       - uses: actions/checkout@v7
         with:
           repository: ghostty-org/ghostty

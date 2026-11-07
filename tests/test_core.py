@@ -92,3 +92,8 @@ def test_modes_replies_and_colors():
         assert replies == [b'\x1b[1;1R', b'\x1b]10;rgb:eeee/eeee/eeee\x07', b'\x1b]11;rgb:1010/2020/3030\x07']
         t.on_reply(lambda r: 1/0)
         with pytest.raises(ZeroDivisionError): t.feed('\x1b[6n')
+
+
+def test_native_library_version():
+    from ghostty._ffi import ffi, lib
+    assert ffi.string(lib.ghostty_version()).decode() == '1.0.0'
