@@ -2,7 +2,7 @@
 
 This is a fork of [pyghostty](https://github.com/AnswerDotAI/pyghostty) (from [this commit](https://github.com/AnswerDotAI/pyghostty/commit/5abf31813fb3707fcded75d9521b03e3bdbdfee8)).
 
-Python bindings for [libghostty-vt](https://github.com/ghostty-org/ghostty/tree/vt-1.0.0), Ghostty's embeddable terminal emulation core, a headless, high-fidelity VT emulator. These bindings cover terminal state, screen and scrollback snapshots, kitty graphics, and everything else Ghostty's production terminal core handles.
+Python bindings for [libghostty-vt](https://github.com/ghostty-org/ghostty/tree/vt-1.0.1), Ghostty's embeddable terminal emulation core, a headless, high-fidelity VT emulator. These bindings cover terminal state, screen and scrollback snapshots, kitty graphics, and everything else Ghostty's production terminal core handles.
 
 The binding is Python-ABI-independent: pure Python (cffi ABI mode) over a bundled `libghostty-vt` shared library, so one wheel per platform covers every Python version. No compiler is needed at install time. Wheel builds cover Linux and macOS (x86-64 and ARM64) and Windows (x86-64).
 
@@ -61,8 +61,11 @@ GHOSTTY_SRC=/path/to/ghostty python build_lib.py
 
 Without `GHOSTTY_SRC`, the build looks for a checkout in `ghostty-src/` inside this project.
 
-The checkout must be at the release tag for `vt-version` in `pyproject.toml`
-(currently `vt-1.0.0`), with that tag available locally. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
+The checkout must be at a locally available stable release tag in the same
+major series as `vt-version` in `pyproject.toml`, at or above that version
+(currently `vt-1.0.1` or any later stable 1.x release). Release CI builds the exact configured
+version. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared
+library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
 
 ### Using an external shared library
 
@@ -83,7 +86,8 @@ The loader checks the bundled library, then the active Python environment
 - Windows: `Library/bin/ghostty-vt.dll`
 
 Libraries installed in these locations are found automatically. The external
-library must provide the ABI of libghostty-vt 1.0.0, pinned in `pyproject.toml`.
+library must provide the ABI of libghostty-vt 1.0.0, which upstream guarantees
+for all stable 1.x releases.
 
 Bundled builds require Zig 0.17.0 on PATH or the local toolchain installed by
 `python install_zig.py`. Release CI installs the verified toolchain before building.
