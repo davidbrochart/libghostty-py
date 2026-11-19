@@ -1,5 +1,9 @@
 <!-- do not remove -->
 
+## Unreleased
+
+- Bundle libghostty-vt 1.0.1 in release wheels.
+
 ## 0.3.0 — libghostty-py
 
 - Build against the independent libghostty-vt 1.0.0 release (`vt-1.0.0`)
