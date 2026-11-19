@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from ghostty import Terminal, UnknownSequence
 
@@ -96,4 +98,8 @@ def test_modes_replies_and_colors():
 
 def test_native_library_version():
     from ghostty._ffi import ffi, lib
-    assert ffi.string(lib.ghostty_version()).decode() == '1.0.0'
+    tomllib = pytest.importorskip('tomllib')
+    config = Path(__file__).resolve().parents[1] / 'pyproject.toml'
+    with config.open('rb') as file:
+        expected = tomllib.load(file)['tool']['libghostty']['vt-version']
+    assert ffi.string(lib.ghostty_version()).decode() == expected
