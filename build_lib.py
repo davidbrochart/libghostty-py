@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 "Build libghostty-vt from a ghostty checkout and bundle the shared lib into ghostty/_lib."
-import os,shutil,subprocess,sys,sysconfig,tempfile,tomllib
+import os,re,shutil,subprocess,sys,sysconfig,tempfile,tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -12,19 +12,20 @@ def ghostty_src():
     "The ghostty checkout to build from: $GHOSTTY_SRC, defaulting to ghostty-src inside this project."
     src = Path(os.environ.get('GHOSTTY_SRC', ROOT/'ghostty-src')).expanduser().resolve()
     if not (src/'build.zig').exists(): sys.exit(f"No ghostty checkout at {src}; set GHOSTTY_SRC")
-    res = subprocess.run(['git', '-C', str(src), 'rev-parse', 'HEAD'], capture_output=True, text=True)
-    if res.returncode: sys.exit(res.stderr.strip())
     version = build_config()['vt-version']
-    tag = f'vt-{version}'
-    expected = subprocess.run(
-        ['git', '-C', str(src), 'rev-parse', '--verify', f'refs/tags/{tag}^{{commit}}'],
+    major, minor, patch = map(int, version.split('.'))
+    series = f'vt-{major}.'
+    tags = subprocess.run(
+        ['git', '-C', str(src), 'tag', '--points-at', 'HEAD', '--list', f'{series}*'],
         capture_output=True, text=True,
     )
-    if expected.returncode:
-        sys.exit(f"Ghostty release tag {tag} is missing; fetch it in {src}")
-    if (rev := res.stdout.strip()) != expected.stdout.strip():
-        sys.exit(f"Ghostty checkout is {rev}; expected release {tag} ({expected.stdout.strip()})")
-    return src
+    if tags.returncode: sys.exit(tags.stderr.strip())
+    for tag in tags.stdout.splitlines():
+        release = re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', tag.removeprefix(series))
+        if release and tuple(map(int, release.groups())) >= (minor, patch):
+            return src
+    sys.exit(f"Expected a {series}x.x release tag at HEAD in {src} "
+             f"(minimum vt-{version}); fetch the tag and check it out")
 
 def _built_lib(prefix, returncode):
     if sys.platform == 'win32': root,pattern,name = prefix/'bin','ghostty-vt.dll','libghostty-vt.dll'

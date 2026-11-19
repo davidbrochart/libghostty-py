@@ -61,8 +61,11 @@ GHOSTTY_SRC=/path/to/ghostty python build_lib.py
 
 Without `GHOSTTY_SRC`, the build looks for a checkout in `ghostty-src/` inside this project.
 
-The checkout must be at the release tag for `vt-version` in `pyproject.toml`
-(currently `vt-1.0.0`), with that tag available locally. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
+The checkout must be at a locally available stable release tag in the same
+major series as `vt-version` in `pyproject.toml`, at or above that version
+(currently any `vt-1.x.x` release). Release CI builds the exact configured
+version. This runs `zig build -Demit-lib-vt=true` and copies the resulting shared
+library into `ghostty/_lib/`, where the package loader and wheel builds pick it up.
 
 ### Using an external shared library
 
@@ -83,7 +86,8 @@ The loader checks the bundled library, then the active Python environment
 - Windows: `Library/bin/ghostty-vt.dll`
 
 Libraries installed in these locations are found automatically. The external
-library must provide the ABI of libghostty-vt 1.0.0, pinned in `pyproject.toml`.
+library must provide the ABI of libghostty-vt 1.0.0, which upstream guarantees
+for all stable 1.x releases.
 
 Bundled builds require Zig 0.17.0 on PATH or the local toolchain installed by
 `python install_zig.py`. Release CI installs the verified toolchain before building.
