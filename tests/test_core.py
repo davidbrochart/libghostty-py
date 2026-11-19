@@ -1,3 +1,4 @@
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -98,7 +99,6 @@ def test_modes_replies_and_colors():
 
 def test_native_library_version():
     from ghostty._ffi import ffi, lib
-    tomllib = pytest.importorskip('tomllib')
     config = Path(__file__).resolve().parents[1] / 'pyproject.toml'
     with config.open('rb') as file:
         expected = tomllib.load(file)['tool']['libghostty']['vt-version']

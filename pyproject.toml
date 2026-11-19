@@ -5,10 +5,10 @@ backend-path = ["."]
 
 [project]
 name = "libghostty-py"
-dynamic = ["version"]
+version = "0.3.1"
 description = "Python bindings for libghostty"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE", "LICENSE.ghostty"]
 authors = [{ name = "pyghostty contributors" }, { name = "libghostty-py contributors" }]
@@ -29,9 +29,6 @@ dev = [
 
 [project.urls]
 Upstream = "https://github.com/AnswerDotAI/pyghostty"
-
-[tool.setuptools.dynamic]
-version = { attr = "ghostty.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["ghostty"]
