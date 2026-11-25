@@ -111,7 +111,7 @@ LIBGHOSTTY_XTERM_MODULE=/tmp/libghostty-xterm/node_modules/@xterm/headless pytes
 
 ### Versioning
 
-Version lives in `ghostty/__init__.py` as `__version__`.
+Set the package version in `pyproject.toml`. Python exposes it as `ghostty.__version__`.
 
 ### Releases
 

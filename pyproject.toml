@@ -5,7 +5,7 @@ backend-path = ["."]
 
 [project]
 name = "libghostty-py"
-version = "0.3.1"
+version = "0.3.2"
 description = "Python bindings for libghostty"
 readme = "README.md"
 requires-python = ">=3.11"

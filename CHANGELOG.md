@@ -1,6 +1,6 @@
 <!-- do not remove -->
 
-## Unreleased
+## 0.3.2 — libghostty-py
 
 - Bundle libghostty-vt 1.0.2 in release wheels.
 
